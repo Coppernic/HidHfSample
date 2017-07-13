@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">HID HF Sample</string>
+    <string name="basics">Basics</string>
+    <string name="commands">Commands</string>
+    <string name="power">Power</string>
+    <string name="open">Open</string>
+    <string name="firmware_version">Firmware Version</string>
+    <string name="logs">Logs</string>
+    <string name="clear">Clear</string>
+    <string name="select">Select</string>
+    <string name="continuous_mode">Continuous Mode</string>
+    <string name="abort">Abort</string>
+
+    <string-array name="baudrates">
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+        <item>230400</item>
+        <item>460800</item>
+    </string-array>
+</resources>

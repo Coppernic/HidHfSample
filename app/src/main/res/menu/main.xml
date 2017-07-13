@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="fr.coppernic.samples.hid.CpcActivity">
+
+    <item
+        android:id="@+id/action_clear"
+        android:orderInCategory="90"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_delete_black_24dp"
+        android:title="@string/clear"/>
+
+</menu>
