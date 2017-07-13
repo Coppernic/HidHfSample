@@ -83,6 +83,7 @@ SerialFactory.getDirectInstance(this, this);
 
 Where your activity implements InstanceListener<SerialCom>:
 
+```groovy
 @Override
 public void onCreated(SerialCom serialCom) {
     // Serial instance is obtained
@@ -93,6 +94,7 @@ public void onCreated(SerialCom serialCom) {
 public void onDisposed(SerialCom serialCom) {
 
 }
+```
 
 ### Open reader and send commands
 
@@ -121,6 +123,7 @@ When powered up, reader is in continuous read mode. BEfore being able to use it,
 ```groovy
 private static final byte[] ABORT_CONTINUOUS_READ_COMMAND = new byte[]{'.'};
 ```
+
 
 ```groovy
 serialCom.send(ABORT_CONTINUOUS_READ_COMMAND, ABORT_CONTINUOUS_READ_COMMAND.length);
