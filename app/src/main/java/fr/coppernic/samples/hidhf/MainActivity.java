@@ -1,17 +1,22 @@
 package fr.coppernic.samples.hidhf;
 
-import android.support.design.widget.Snackbar;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.ScrollingTabContainerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import fr.coppernic.sdk.powermgmt.PowerMgmt;
@@ -25,6 +30,7 @@ import fr.coppernic.sdk.serial.SerialFactory;
 import fr.coppernic.sdk.utils.io.InstanceListener;
 
 public class MainActivity extends AppCompatActivity implements InstanceListener<SerialCom> {
+    private static final String TAG = "MainActivity";
     private static final String SERIAL_PORT = "/dev/ttyHSL1";
 
     private static final byte[] GET_FIRMWARE_COMMAND = new byte[]{'v'};
@@ -36,12 +42,14 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     private PowerMgmt powerMgmt;
 
     // Serial port
+    private String portName;
     private SerialCom serialCom;
 
     // UI
     private Switch swPower;
     private Switch swOpen;
-    ArrayAdapter<String> adapter;
+    private ArrayAdapter<String> adapter;
+    private ArrayAdapter<String> portsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,9 +144,10 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (isChecked) {
-                if (serialCom.open(SERIAL_PORT, getBaudrate()) != SerialCom.ERROR_OK) {
+                if (serialCom.open(portName, getBaudrate()) != SerialCom.ERROR_OK) {
                     addLog("Error open com");
                 } else {
+                    serialCom.setRts(true);
                     addLog("Open com OK");
                     // Starts listening thread
                     new Thread(listeningThread).start();
@@ -169,6 +178,35 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     public void onCreated(SerialCom serialCom) {
         // Serial instance is obtained
         this.serialCom = serialCom;
+        String[] devices = this.serialCom.listDevices();
+
+        portName = SERIAL_PORT;
+
+        ArrayList<String> ports = new ArrayList<>();
+        ports.add(SERIAL_PORT);
+
+        for (String s:devices) {
+            if (s.contains("USB")) {
+                ports.add(s);
+            }
+        }
+
+        portsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, ports);
+        final Spinner spPorts = (Spinner)findViewById(R.id.spPorts);
+        spPorts.setAdapter(portsAdapter);
+        spPorts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                portName = spPorts.getSelectedItem().toString();
+                Log.d(TAG, "Selected port: " + portName);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         swOpen.setEnabled(true);
     }
 
@@ -202,11 +240,22 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
         @Override
         public void run() {
             while (serialCom.isOpened()) {
-                if (serialCom.getQueueStatus() > 0) {
-                    int availableBytes = serialCom.getQueueStatus();
+                int availableBytes;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while ((availableBytes = serialCom.getQueueStatus()) > 0) {
                     byte[] bytesRead = new byte[availableBytes];
                     serialCom.receive(100, availableBytes, bytesRead);
-                    addLog(new String(bytesRead));
+                    try {
+                        baos.write(bytesRead);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    SystemClock.sleep(5);
+                }
+
+                if (baos.size() > 0) {
+                    addLog(new String(baos.toByteArray()));
                 }
             }
         }
