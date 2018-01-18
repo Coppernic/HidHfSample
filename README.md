@@ -30,36 +30,70 @@ CpcCore is the library responsible for power management.
 In your build.gradle file, at module level, add the following lines:
 
 ```groovy
-compile 'fr.coppernic.sdk.core:CpcCore:1.3.0'
+compile 'fr.coppernic.sdk.core:CpcCore:1.4.0'
 ```
 #### Power on/off RFID reader
 
-First, create a Power management object:
+* Implements power listener
 
-``` groovy
-private PowerMgmt powerMgmt;
-```
-Then instantiate it:
+```java
 
-```groovy
-powerMgmt = PowerMgmtFactory.get().setContext(context)
-                .setPeripheralTypes(PeripheralTypesCone.RfidSc)
-                .setManufacturers(ManufacturersCone.Hid)
-                .setModels(ModelsCone.MultiIso)
-                .setInterfaces(InterfacesCone.ExpansionPort)
-                .build();
-```
-Finally, use the powerOn/powerOff methods:
-
-```groovy
-public void rfid (boolean on) {
-    if (on) {
-        powerMgmt.powerOn();
+public class MainActivity extends AppCompatActivity implements PowerListener {
+  // [...]
+  @Override
+  public void onPowerUp(RESULT res, Peripheral peripheral) {
+    if (res == RESULT.OK) {
+      //Peripheral is on
     } else {
-        powerMgmt.powerOff();
+      //Peripehral is undefined
     }
+  }
+
+  @Override
+  public void onPowerDown(RESULT res, Peripheral peripheral) {
+      //Peripheral is off
+  }
+  // [...]
+}
+
+```
+
+ * Register the listener
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    PowerManager.get().registerListener(this);
 }
 ```
+
+ * Power reader on
+
+```java
+// Powers on HID HF reader
+ConePeripheral.RFID_HID_MULTIISO_GPIO.on(context);
+// The listener will be called with the result
+```
+
+ * Power off when you are done
+
+```java
+// Powers off HID HF reader
+ConePeripheral.RFID_HID_MULTIISO_GPIO.off(context);
+// The listener will be called with the result
+```
+
+ * release resources
+
+```java
+@Override
+protected void onStop() {
+    PowerManager.get().unregisterAll();
+    PowerManager.get().releaseResources();
+    super.onDestroy();
+}
+```
+
 
 ### Reader initialization
 #### Libraries
