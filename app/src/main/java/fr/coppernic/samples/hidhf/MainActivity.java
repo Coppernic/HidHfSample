@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
 
         ButterKnife.bind(this);
 
+        PowerManager.get().registerListener(this);
+
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
         ListView lvLogs = (ListView) findViewById(R.id.lvLogs);
         lvLogs.setAdapter(adapter);
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     protected void onStart() {
         super.onStart();
 
-        PowerManager.get().registerListener(this);
+
     }
 
     @Override
@@ -130,10 +132,14 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
             swPower.setChecked(false);
         }
 
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
         PowerManager.get().unregisterAll();
         PowerManager.get().releaseResources();
-
-        super.onStop();
+        super.onDestroy();
     }
 
     @OnCheckedChanged(R.id.swPower)
