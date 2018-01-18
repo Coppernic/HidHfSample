@@ -10,6 +10,8 @@
     <string name="select">Select</string>
     <string name="continuous_mode">Continuous Mode</string>
     <string name="abort">Abort</string>
+    <string name="command">Command</string>
+    <string name="send">Send</string>
 
     <string-array name="baudrates">
         <item>9600</item>

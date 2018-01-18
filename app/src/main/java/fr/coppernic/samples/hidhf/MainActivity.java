@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -19,6 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import fr.coppernic.sdk.powermgmt.PowerMgmt;
 import fr.coppernic.sdk.powermgmt.PowerMgmtFactory;
 import fr.coppernic.sdk.powermgmt.cone.identifiers.InterfacesCone;
@@ -37,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     private static final byte[] SELECT_COMMAND = new byte[]{'s'};
     private static final byte[] CONTINUOUS_MODE_COMMAND = new byte[]{'c'};
     private static final byte[] ABORT_CONTINUOUS_READ_COMMAND = new byte[]{'.'};
+    private static final byte[] ENABLE_ISSO1443A = new byte[]{'o', 'a'};
 
     // Power Management
     private PowerMgmt powerMgmt;
@@ -50,11 +55,14 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     private Switch swOpen;
     private ArrayAdapter<String> adapter;
     private ArrayAdapter<String> portsAdapter;
+    @BindView(R.id.etCommand) public EditText etCommand;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ButterKnife.bind(this);
 
         // Build Power management object
         powerMgmt = PowerMgmtFactory.get()
@@ -276,5 +284,11 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
                 adapter.notifyDataSetChanged();
             }
         });
+    }
+
+    @OnClick(R.id.btnSend)
+    public void sendCustomCommand() {
+        String command = etCommand.getText().toString();
+        sendCommand(command.getBytes());
     }
 }
