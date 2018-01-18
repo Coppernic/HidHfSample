@@ -5,6 +5,11 @@ Introduction
 
 This application illustrates how to use the HID HF RFID reader on Coppernic C-One device.
 
+Documentation
+-------------
+
+The full documentation for HID HF reader can be found [here](https://github.com/Coppernic/coppernic.github.io/raw/master/assets/ 	UserManual_HF_Multi ISO_RFID_Reader V1.2.pdf).
+
 The libraries
 -------------
 
