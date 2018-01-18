@@ -118,7 +118,7 @@ serialCom.send(command, command.length);
 ```
 ### Initialization
 
-When powered up, reader is in continuous read mode. BEfore being able to use it, disable contiunous read mode:
+When powered up, reader is in continuous read mode. Before being able to use it, disable continuous read mode by sending a simple command:
 
 ```groovy
 private static final byte[] ABORT_CONTINUOUS_READ_COMMAND = new byte[]{'.'};
