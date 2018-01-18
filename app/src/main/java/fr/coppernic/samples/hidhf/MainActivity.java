@@ -23,17 +23,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
-import fr.coppernic.sdk.powermgmt.PowerMgmt;
-import fr.coppernic.sdk.powermgmt.PowerMgmtFactory;
-import fr.coppernic.sdk.powermgmt.cone.identifiers.InterfacesCone;
-import fr.coppernic.sdk.powermgmt.cone.identifiers.ManufacturersCone;
-import fr.coppernic.sdk.powermgmt.cone.identifiers.ModelsCone;
-import fr.coppernic.sdk.powermgmt.cone.identifiers.PeripheralTypesCone;
+import fr.coppernic.sdk.power.PowerManager;
+import fr.coppernic.sdk.power.api.PowerListener;
+import fr.coppernic.sdk.power.api.peripheral.Peripheral;
+import fr.coppernic.sdk.power.impl.cone.ConePeripheral;
 import fr.coppernic.sdk.serial.SerialCom;
 import fr.coppernic.sdk.serial.SerialFactory;
+import fr.coppernic.sdk.utils.core.CpcResult;
 import fr.coppernic.sdk.utils.io.InstanceListener;
 
-public class MainActivity extends AppCompatActivity implements InstanceListener<SerialCom> {
+public class MainActivity extends AppCompatActivity implements InstanceListener<SerialCom>, PowerListener {
     private static final String TAG = "MainActivity";
     private static final String SERIAL_PORT = "/dev/ttyHSL1";
 
@@ -41,15 +40,12 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     private static final byte[] SELECT_COMMAND = new byte[]{'s'};
     private static final byte[] CONTINUOUS_MODE_COMMAND = new byte[]{'c'};
     private static final byte[] ABORT_CONTINUOUS_READ_COMMAND = new byte[]{'.'};
-    // UI
     @BindView(R.id.swPower)
     public Switch swPower;
     @BindView(R.id.swOpen)
     public Switch swOpen;
     @BindView(R.id.etCommand)
     public EditText etCommand;
-    // Power Management
-    private PowerMgmt powerMgmt;
     // Serial port
     private String portName;
     private SerialCom serialCom;
@@ -89,15 +85,6 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
 
         ButterKnife.bind(this);
 
-        // Build Power management object
-        powerMgmt = PowerMgmtFactory.get()
-                .setContext(this)
-                .setPeripheralTypes(PeripheralTypesCone.RfidSc)
-                .setManufacturers(ManufacturersCone.Hid)
-                .setModels(ModelsCone.MultiIso)
-                .setInterfaces(InterfacesCone.ExpansionPort)
-                .build();
-
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
         ListView lvLogs = (ListView) findViewById(R.id.lvLogs);
         lvLogs.setAdapter(adapter);
@@ -127,9 +114,14 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onStart() {
+        super.onStart();
 
+        PowerManager.get().registerListener(this);
+    }
+
+    @Override
+    protected void onStop() {
         if (swOpen.isChecked()) {
             swOpen.setChecked(false);
         }
@@ -137,14 +129,19 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
         if (swPower.isChecked()) {
             swPower.setChecked(false);
         }
+
+        PowerManager.get().unregisterAll();
+        PowerManager.get().releaseResources();
+
+        super.onStop();
     }
 
     @OnCheckedChanged(R.id.swPower)
     public void onSwPowerCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-            powerMgmt.powerOn();
+            ConePeripheral.RFID_HID_MULTIISO_GPIO.on(this);
         } else {
-            powerMgmt.powerOff();
+            ConePeripheral.RFID_HID_MULTIISO_GPIO.off(this);
         }
     }
 
@@ -246,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
 
     /**
      * Sends a command to serial port
+     *
      * @param command Byte array command to be sent
      */
     private void sendCommand(final byte[] command) {
@@ -273,5 +271,15 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
                 adapter.notifyDataSetChanged();
             }
         });
+    }
+
+    @Override
+    public void onPowerUp(CpcResult.RESULT result, Peripheral peripheral) {
+
+    }
+
+    @Override
+    public void onPowerDown(CpcResult.RESULT result, Peripheral peripheral) {
+
     }
 }
