@@ -30,7 +30,7 @@ CpcCore is the library responsible for power management.
 In your build.gradle file, at module level, add the following lines:
 
 ```groovy
-compile 'fr.coppernic.sdk.core:CpcCore:1.0.0'
+compile 'fr.coppernic.sdk.core:CpcCore:1.3.0'
 ```
 #### Power on/off RFID reader
 
