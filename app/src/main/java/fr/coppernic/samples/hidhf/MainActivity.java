@@ -3,6 +3,7 @@ package fr.coppernic.samples.hidhf;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,9 +42,9 @@ public class MainActivity extends AppCompatActivity implements InstanceListener<
     private static final byte[] CONTINUOUS_MODE_COMMAND = new byte[]{'c'};
     private static final byte[] ABORT_CONTINUOUS_READ_COMMAND = new byte[]{'.'};
     @BindView(R.id.swPower)
-    public Switch swPower;
+    public SwitchCompat swPower;
     @BindView(R.id.swOpen)
-    public Switch swOpen;
+    public SwitchCompat swOpen;
     @BindView(R.id.etCommand)
     public EditText etCommand;
     // Serial port
